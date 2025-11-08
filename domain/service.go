@@ -54,7 +54,6 @@ func DownloadDataset(req *pb.DownloadRequest, stream grpc.ServerStreamingServer[
 			})
 			return err
 		}
-		print(parsed)
 		// Send the parsed protobuf message back to the client
 		logger.Logger.Debug("Successfully parsed WHO Europe response into protobuf")
 		stream.Send(&pb.DownloadReply{
