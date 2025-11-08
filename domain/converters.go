@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	pb "github.com/hikata101/health_data_service/gen/github.com/hikata101/health_data_service/v1"
 )
@@ -217,4 +218,20 @@ func ParseWHOEuropeCSVToReply(csvStr string) (*pb.WHOEuropeResponse, error) {
 
 	response.Data = datas
 	return response, nil
+}
+
+func ConvertDateParamToQuery(start_date *pb.Date, end_date *pb.Date) string {
+	years := ";YEAR:"
+	if start_date != nil {
+		if end_date != nil {
+			years += fmt.Sprintf("%d-%d", start_date.Year, end_date.Year)
+		} else {
+			years += fmt.Sprintf("%d-%d", start_date.Year, time.Now().Year())
+		}
+	} else if end_date != nil {
+		years += fmt.Sprintf("%d-%d", end_date.Year-100, end_date.Year)
+	} else {
+		years = ""
+	}
+	return years
 }

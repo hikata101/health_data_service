@@ -34,7 +34,8 @@ func DownloadDataset(req *pb.DownloadRequest, stream grpc.ServerStreamingServer[
 			})
 			return err
 		}
-		query_params := "filter=COUNTRY:" + countryCode
+		years := ConvertDateParamToQuery(req.StartDate, req.EndDate)
+		query_params := "filter=COUNTRY:" + countryCode + years
 		logger.Logger.Debug(fmt.Sprintf("Downloading WHO Europe dataset with parameters: %+v\n", query_params))
 		// Call the external API to get the data
 		resp, err := infrastructure.Execute(stream.Context(), IndicatorCode, query_params)
