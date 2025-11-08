@@ -4,9 +4,9 @@ option go_package = "github.com/hikata101/health_data_service/v1";
 
 service Dataset {
   // Fan-out to multiple providers and stream back results in arrival order.
-  rpc Download (DownloadRequest) returns (stream DownloadReply);
-  rpc Upload(stream UploadChunk) returns (UploadReply);
-  rpc List(ListDatasetsRequest) returns (ListDatasetsReply);
+  rpc Download (DownloadRequest) returns (stream DownloadResponse);
+  rpc Upload(stream UploadChunk) returns (UploadResponse);
+  rpc List(ListDatasetsRequest) returns (ListDatasetsResponse);
 }
 
 enum ProvidersKind {
@@ -106,28 +106,28 @@ enum Country{
   COUNTRY_KOSOVO = 66;
 }
 
-message DownloadReply {
+message DownloadResponse {
   int32 status = 1;
-  oneof reply {
-    WHOEuropeReply who_europe_reply = 2;
+  oneof response {
+    WHOEuropeResponse who_europe_response = 2;
   }
 }
 
-message WHOEuropeReply {
+message WHOEuropeResponse {
   string csv = 1;
   string data_source = 2;
   string unit = 3;
   string representation = 4;
   repeated string data_set = 5;
   string masks = 6;
-  repeated WHOReplyData data = 7;
+  repeated WHOData data = 7;
   string last_update = 8;
   string description = 9;
   string reference_link = 10;
   string copyright = 11;
 }
 
-message WHOReplyData {
+message WHOData {
   string country = 1;
   string country_grp = 2;
   string sex = 3;
@@ -159,7 +159,7 @@ message UploadChunk {
   }
 }
 
-message UploadReply { DatasetMeta meta = 1; }
+message UploadResponse { DatasetMeta meta = 1; }
 
 message ListDatasetsRequest {}
-message ListDatasetsReply { repeated DatasetMeta items = 1; }
+message ListDatasetsResponse { repeated DatasetMeta items = 1; }

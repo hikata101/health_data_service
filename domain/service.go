@@ -12,7 +12,7 @@ import (
 	"google.golang.org/grpc/codes"
 )
 
-func DownloadDataset(req *pb.DownloadRequest, stream grpc.ServerStreamingServer[pb.DownloadReply]) error {
+func DownloadDataset(req *pb.DownloadRequest, stream grpc.ServerStreamingServer[pb.DownloadResponse]) error {
 	// Implement the logic to download the dataset here.
 	// For now, just print a message.
 	switch v := req.Request.(type) {
@@ -21,7 +21,7 @@ func DownloadDataset(req *pb.DownloadRequest, stream grpc.ServerStreamingServer[
 		IndicatorCode, err := GetIndicatorCode(v.WhoEurope.Indicator)
 		if err != nil {
 			logger.Logger.Error(fmt.Sprintf("Error getting indicator code: %v", err))
-			stream.Send(&pb.DownloadReply{
+			stream.Send(&pb.DownloadResponse{
 				Status: int32(codes.InvalidArgument),
 			})
 			return err
@@ -29,7 +29,7 @@ func DownloadDataset(req *pb.DownloadRequest, stream grpc.ServerStreamingServer[
 		countryCode, err := GetCountryCode(v.WhoEurope.Country)
 		if err != nil {
 			logger.Logger.Error(fmt.Sprintf("Error getting country code: %v", err))
-			stream.Send(&pb.DownloadReply{
+			stream.Send(&pb.DownloadResponse{
 				Status: int32(codes.InvalidArgument),
 			})
 			return err
@@ -40,7 +40,7 @@ func DownloadDataset(req *pb.DownloadRequest, stream grpc.ServerStreamingServer[
 		resp, err := infrastructure.Execute(stream.Context(), IndicatorCode, query_params)
 		if err != nil {
 			logger.Logger.Error(fmt.Sprintf("Error executing WHO Europe request: %v", err))
-			stream.Send(&pb.DownloadReply{
+			stream.Send(&pb.DownloadResponse{
 				Status: int32(codes.Unknown),
 			})
 			return err
@@ -49,17 +49,17 @@ func DownloadDataset(req *pb.DownloadRequest, stream grpc.ServerStreamingServer[
 		parsed, err := ParseWHOEuropeCSVToReply(resp)
 		if err != nil {
 			logger.Logger.Error(fmt.Sprintf("Error parsing WHO Europe response: %v", err))
-			stream.Send(&pb.DownloadReply{
+			stream.Send(&pb.DownloadResponse{
 				Status: int32(codes.Internal),
 			})
 			return err
 		}
 		// Send the parsed protobuf message back to the client
 		logger.Logger.Debug("Successfully parsed WHO Europe response into protobuf")
-		stream.Send(&pb.DownloadReply{
+		stream.Send(&pb.DownloadResponse{
 			Status: int32(codes.OK),
-			Reply: &pb.DownloadReply_WhoEuropeReply{
-				WhoEuropeReply: parsed,
+			Response: &pb.DownloadResponse_WhoEuropeResponse{
+				WhoEuropeResponse: parsed,
 			}})
 	default:
 		logger.Logger.Error("Unknown download request type")

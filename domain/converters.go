@@ -136,16 +136,16 @@ func GetIndicator(code string) (pb.WHOEuropeCodes, error) {
 }
 
 // ParseWHOEuropeCSVToReply parses a WHO-Europe CSV-style string (like the sample you provided)
-// into a pb.WHOEuropeReply. The function is tolerant: it first extracts simple metadata
+// into a pb.WhoEuropeResponse. The function is tolerant: it first extracts simple metadata
 // key/value pairs until it finds the data header row ("COUNTRY","COUNTRY_GRP","SEX","YEAR","VALUE"),
 // then collects data rows into objects and attempts to unmarshal a JSON representation into
-// pb.WHOEuropeReply using protojson with unknown fields discarded.
+// pb.WhoEuropeResponse using protojson with unknown fields discarded.
 //
 // Note: this implementation assumes the proto message uses common JSON field names such as
 // "indicator", "lastUpdate", "description", "referenceLink" and a repeated "data" field whose
 // elements map keys "COUNTRY","COUNTRY_GRP","SEX","YEAR","VALUE" (lowercased in JSON).
 // If your generated proto uses different field names adjust the jsonMap construction accordingly.
-func ParseWHOEuropeCSVToReply(csvStr string) (*pb.WHOEuropeReply, error) {
+func ParseWHOEuropeCSVToReply(csvStr string) (*pb.WHOEuropeResponse, error) {
 	csvStr = strings.ReplaceAll(csvStr, "\ufeff", "") // normalize line endings
 	r := csv.NewReader(strings.NewReader(csvStr))
 	r.FieldsPerRecord = -1
@@ -155,27 +155,27 @@ func ParseWHOEuropeCSVToReply(csvStr string) (*pb.WHOEuropeReply, error) {
 	}
 
 	datasets := []string{}
-	reply := &pb.WHOEuropeReply{
+	response := &pb.WHOEuropeResponse{
 		Csv: csvStr,
 	}
-	datas := []*pb.WHOReplyData{}
+	datas := []*pb.WHOData{}
 
-	reply.DataSource = records[4][1]
-	reply.Unit = records[6][1]
-	reply.Representation = records[8][1]
+	response.DataSource = records[4][1]
+	response.Unit = records[6][1]
+	response.Representation = records[8][1]
 	breakIndex := 0
 	for i, rec := range records {
 		if i < 10 {
 			continue
 		}
 		if rec[0] == "DATA_MASK" {
-			reply.Masks = records[i][1]
+			response.Masks = records[i][1]
 			breakIndex = i + 6
 			break
 		}
 		datasets = append(datasets, rec[1])
 	}
-	reply.DataSet = datasets
+	response.DataSet = datasets
 	// Walk rows: metadata until header row is found, then data rows according to header
 	for i, rec := range records[breakIndex:] {
 		// skip empty records
@@ -183,10 +183,10 @@ func ParseWHOEuropeCSVToReply(csvStr string) (*pb.WHOEuropeReply, error) {
 			continue
 		}
 		if rec[0] == "Last update" {
-			reply.LastUpdate = rec[1]
-			reply.Description = records[i+breakIndex+1][1]
-			reply.ReferenceLink = records[i+breakIndex+2][1]
-			reply.Copyright = records[i+breakIndex+4][0]
+			response.LastUpdate = rec[1]
+			response.Description = records[i+breakIndex+1][1]
+			response.ReferenceLink = records[i+breakIndex+2][1]
+			response.Copyright = records[i+breakIndex+4][0]
 			break
 		}
 		// trim spaces on all fields
@@ -205,7 +205,7 @@ func ParseWHOEuropeCSVToReply(csvStr string) (*pb.WHOEuropeReply, error) {
 			return nil, fmt.Errorf("invalid numeric value %q at row %d: %w", rec[4], i+breakIndex, err)
 		}
 
-		data := &pb.WHOReplyData{
+		data := &pb.WHOData{
 			Country:    rec[0],
 			CountryGrp: rec[1],
 			Sex:        rec[2],
@@ -215,6 +215,6 @@ func ParseWHOEuropeCSVToReply(csvStr string) (*pb.WHOEuropeReply, error) {
 		datas = append(datas, data)
 	}
 
-	reply.Data = datas
-	return reply, nil
+	response.Data = datas
+	return response, nil
 }
