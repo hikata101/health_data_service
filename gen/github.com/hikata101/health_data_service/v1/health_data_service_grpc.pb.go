@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v3.14.0
-// source: proto/health_data_service.proto
+// source: health_data_service.proto
 
 package v1
 
@@ -192,5 +192,5 @@ var Dataset_ServiceDesc = grpc.ServiceDesc{
 			ClientStreams: true,
 		},
 	},
-	Metadata: "proto/health_data_service.proto",
+	Metadata: "health_data_service.proto",
 }

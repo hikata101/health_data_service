@@ -7,84 +7,85 @@ import (
 	"strings"
 	"time"
 
+	health_data "github.com/hikata101/health_data/v1"
 	pb "github.com/hikata101/health_data_service/gen/github.com/hikata101/health_data_service/v1"
 )
 
-var dictionary_countries = map[pb.Country]string{
-	pb.Country_COUNTRY_ALBANIA:                                         "ALB",
-	pb.Country_COUNTRY_ANDORRA:                                         "AND",
-	pb.Country_COUNTRY_ARMENIA:                                         "ARM",
-	pb.Country_COUNTRY_AUSTRIA:                                         "AUT",
-	pb.Country_COUNTRY_AZERBAIJAN:                                      "AZE",
-	pb.Country_COUNTRY_BELARUS:                                         "BLR",
-	pb.Country_COUNTRY_BELGIUM:                                         "BEL",
-	pb.Country_COUNTRY_BELGIUM_BRUXELLES:                               "BE-BRU",
-	pb.Country_COUNTRY_BELGIUM_FLANDERS:                                "BE-VLG",
-	pb.Country_COUNTRY_BELGIUM_WALLONIA:                                "BE-WAL",
-	pb.Country_COUNTRY_BOSNIA_AND_HERZEGOVINA:                          "BIH",
-	pb.Country_COUNTRY_BULGARIA:                                        "BGR",
-	pb.Country_COUNTRY_CANADA:                                          "CAN",
-	pb.Country_COUNTRY_CROATIA:                                         "HRV",
-	pb.Country_COUNTRY_CYPRUS:                                          "CYP",
-	pb.Country_COUNTRY_CZECH_REPUBLIC:                                  "CZE",
-	pb.Country_COUNTRY_DENMARK:                                         "DNK",
-	pb.Country_COUNTRY_ESTONIA:                                         "EST",
-	pb.Country_COUNTRY_FINLAND:                                         "FIN",
-	pb.Country_COUNTRY_FRANCE:                                          "FRA",
-	pb.Country_COUNTRY_GEORGIA:                                         "GEO",
-	pb.Country_COUNTRY_GERMANY:                                         "DEU",
-	pb.Country_COUNTRY_GREECE:                                          "GRC",
-	pb.Country_COUNTRY_GREENLAND:                                       "GRL",
-	pb.Country_COUNTRY_HUNGARY:                                         "HUN",
-	pb.Country_COUNTRY_ICELAND:                                         "ISL",
-	pb.Country_COUNTRY_IRELAND:                                         "IRL",
-	pb.Country_COUNTRY_ISRAEL:                                          "ISR",
-	pb.Country_COUNTRY_ITALY:                                           "ITA",
-	pb.Country_COUNTRY_KAZAKHSTAN:                                      "KAZ",
-	pb.Country_COUNTRY_KYRGYZSTAN:                                      "KGZ",
-	pb.Country_COUNTRY_LATVIA:                                          "LVA",
-	pb.Country_COUNTRY_LITHUANIA:                                       "LTU",
-	pb.Country_COUNTRY_LUXEMBOURG:                                      "LUX",
-	pb.Country_COUNTRY_MALTA:                                           "MLT",
-	pb.Country_COUNTRY_MONACO:                                          "MCO",
-	pb.Country_COUNTRY_MONTENEGRO:                                      "MNE",
-	pb.Country_COUNTRY_NETHERLANDS:                                     "NLD",
-	pb.Country_COUNTRY_NORTH_MACEDONIA:                                 "MKD",
-	pb.Country_COUNTRY_NORWAY:                                          "NOR",
-	pb.Country_COUNTRY_POLAND:                                          "POL",
-	pb.Country_COUNTRY_PORTUGAL:                                        "PRT",
-	pb.Country_COUNTRY_REPUBLIC_OF_MOLDOVA:                             "MDA",
-	pb.Country_COUNTRY_ROMANIA:                                         "ROU",
-	pb.Country_COUNTRY_RUSSIAN_FEDERATION:                              "RUS",
-	pb.Country_COUNTRY_SAN_MARINO:                                      "SMR",
-	pb.Country_COUNTRY_SERBIA:                                          "SRB",
-	pb.Country_COUNTRY_SERBIA_VOJVODINA:                                "RS-SRB",
-	pb.Country_COUNTRY_THE_FORMER_STATE_UNION_OF_SERBIA_AND_MONTENEGRO: "SCG",
-	pb.Country_COUNTRY_SLOVAKIA:                                        "SVK",
-	pb.Country_COUNTRY_SLOVENIA:                                        "SVN",
-	pb.Country_COUNTRY_SPAIN:                                           "ESP",
-	pb.Country_COUNTRY_SWEDEN:                                          "SWE",
-	pb.Country_COUNTRY_SWITZERLAND:                                     "CHE",
-	pb.Country_COUNTRY_TAJIKISTAN:                                      "TJK",
-	pb.Country_COUNTRY_TURKIYE:                                         "TUR",
-	pb.Country_COUNTRY_TURKMENISTAN:                                    "TKM",
-	pb.Country_COUNTRY_UKRAINE:                                         "UKR",
-	pb.Country_COUNTRY_UNITED_KINGDOM:                                  "GBR",
-	pb.Country_COUNTRY_UNITED_KINGDOM_ENGLAND:                          "GB-ENG",
-	pb.Country_COUNTRY_UNITED_KINGDOM_NORTHERN_IRELAND:                 "GB-NIR",
-	pb.Country_COUNTRY_UNITED_KINGDOM_SCOTLAND:                         "GB-SCT",
-	pb.Country_COUNTRY_UNITED_KINGDOM_WALES:                            "GB-WLS",
-	pb.Country_COUNTRY_UNITED_STATES_OF_AMERICA:                        "USA",
-	pb.Country_COUNTRY_REPUBLIC_OF_UZBEKISTAN:                          "UZB",
-	pb.Country_COUNTRY_KOSOVO:                                          "RS-XKX",
+var dictionary_countries = map[health_data.Country]string{
+	health_data.Country_COUNTRY_ALBANIA:                                         "ALB",
+	health_data.Country_COUNTRY_ANDORRA:                                         "AND",
+	health_data.Country_COUNTRY_ARMENIA:                                         "ARM",
+	health_data.Country_COUNTRY_AUSTRIA:                                         "AUT",
+	health_data.Country_COUNTRY_AZERBAIJAN:                                      "AZE",
+	health_data.Country_COUNTRY_BELARUS:                                         "BLR",
+	health_data.Country_COUNTRY_BELGIUM:                                         "BEL",
+	health_data.Country_COUNTRY_BELGIUM_BRUXELLES:                               "BE-BRU",
+	health_data.Country_COUNTRY_BELGIUM_FLANDERS:                                "BE-VLG",
+	health_data.Country_COUNTRY_BELGIUM_WALLONIA:                                "BE-WAL",
+	health_data.Country_COUNTRY_BOSNIA_AND_HERZEGOVINA:                          "BIH",
+	health_data.Country_COUNTRY_BULGARIA:                                        "BGR",
+	health_data.Country_COUNTRY_CANADA:                                          "CAN",
+	health_data.Country_COUNTRY_CROATIA:                                         "HRV",
+	health_data.Country_COUNTRY_CYPRUS:                                          "CYP",
+	health_data.Country_COUNTRY_CZECH_REPUBLIC:                                  "CZE",
+	health_data.Country_COUNTRY_DENMARK:                                         "DNK",
+	health_data.Country_COUNTRY_ESTONIA:                                         "EST",
+	health_data.Country_COUNTRY_FINLAND:                                         "FIN",
+	health_data.Country_COUNTRY_FRANCE:                                          "FRA",
+	health_data.Country_COUNTRY_GEORGIA:                                         "GEO",
+	health_data.Country_COUNTRY_GERMANY:                                         "DEU",
+	health_data.Country_COUNTRY_GREECE:                                          "GRC",
+	health_data.Country_COUNTRY_GREENLAND:                                       "GRL",
+	health_data.Country_COUNTRY_HUNGARY:                                         "HUN",
+	health_data.Country_COUNTRY_ICELAND:                                         "ISL",
+	health_data.Country_COUNTRY_IRELAND:                                         "IRL",
+	health_data.Country_COUNTRY_ISRAEL:                                          "ISR",
+	health_data.Country_COUNTRY_ITALY:                                           "ITA",
+	health_data.Country_COUNTRY_KAZAKHSTAN:                                      "KAZ",
+	health_data.Country_COUNTRY_KYRGYZSTAN:                                      "KGZ",
+	health_data.Country_COUNTRY_LATVIA:                                          "LVA",
+	health_data.Country_COUNTRY_LITHUANIA:                                       "LTU",
+	health_data.Country_COUNTRY_LUXEMBOURG:                                      "LUX",
+	health_data.Country_COUNTRY_MALTA:                                           "MLT",
+	health_data.Country_COUNTRY_MONACO:                                          "MCO",
+	health_data.Country_COUNTRY_MONTENEGRO:                                      "MNE",
+	health_data.Country_COUNTRY_NETHERLANDS:                                     "NLD",
+	health_data.Country_COUNTRY_NORTH_MACEDONIA:                                 "MKD",
+	health_data.Country_COUNTRY_NORWAY:                                          "NOR",
+	health_data.Country_COUNTRY_POLAND:                                          "POL",
+	health_data.Country_COUNTRY_PORTUGAL:                                        "PRT",
+	health_data.Country_COUNTRY_REPUBLIC_OF_MOLDOVA:                             "MDA",
+	health_data.Country_COUNTRY_ROMANIA:                                         "ROU",
+	health_data.Country_COUNTRY_RUSSIAN_FEDERATION:                              "RUS",
+	health_data.Country_COUNTRY_SAN_MARINO:                                      "SMR",
+	health_data.Country_COUNTRY_SERBIA:                                          "SRB",
+	health_data.Country_COUNTRY_SERBIA_VOJVODINA:                                "RS-SRB",
+	health_data.Country_COUNTRY_THE_FORMER_STATE_UNION_OF_SERBIA_AND_MONTENEGRO: "SCG",
+	health_data.Country_COUNTRY_SLOVAKIA:                                        "SVK",
+	health_data.Country_COUNTRY_SLOVENIA:                                        "SVN",
+	health_data.Country_COUNTRY_SPAIN:                                           "ESP",
+	health_data.Country_COUNTRY_SWEDEN:                                          "SWE",
+	health_data.Country_COUNTRY_SWITZERLAND:                                     "CHE",
+	health_data.Country_COUNTRY_TAJIKISTAN:                                      "TJK",
+	health_data.Country_COUNTRY_TURKIYE:                                         "TUR",
+	health_data.Country_COUNTRY_TURKMENISTAN:                                    "TKM",
+	health_data.Country_COUNTRY_UKRAINE:                                         "UKR",
+	health_data.Country_COUNTRY_UNITED_KINGDOM:                                  "GBR",
+	health_data.Country_COUNTRY_UNITED_KINGDOM_ENGLAND:                          "GB-ENG",
+	health_data.Country_COUNTRY_UNITED_KINGDOM_NORTHERN_IRELAND:                 "GB-NIR",
+	health_data.Country_COUNTRY_UNITED_KINGDOM_SCOTLAND:                         "GB-SCT",
+	health_data.Country_COUNTRY_UNITED_KINGDOM_WALES:                            "GB-WLS",
+	health_data.Country_COUNTRY_UNITED_STATES_OF_AMERICA:                        "USA",
+	health_data.Country_COUNTRY_REPUBLIC_OF_UZBEKISTAN:                          "UZB",
+	health_data.Country_COUNTRY_KOSOVO:                                          "RS-XKX",
 }
 
-var dictionary_codes map[pb.WHOEuropeCodes]string = map[pb.WHOEuropeCodes]string{
-	pb.WHOEuropeCodes_WHO_EUROPE_CODE_INFANT_MORTALITY_INDICATOR:         "HFA_73",
-	pb.WHOEuropeCodes_WHO_EUROPE_CODE_EARLY_NEONATAL_MORTALITY_INDICATOR: "HFA_78",
-	pb.WHOEuropeCodes_WHO_EUROPE_CODE_CIRCULATORY_DISEASES_INDICATOR:     "HFA_98",
-	pb.WHOEuropeCodes_WHO_EUROPE_CODE_ISCHAEMIC_HEART_DISEASE_INDICATOR:  "HFA_107",
-	pb.WHOEuropeCodes_WHO_EUROPE_CODE_CEREBROVASCULAR_DISEASES_INDICATOR: "HFA_119",
+var dictionary_codes map[health_data.WHOEuropeCodes]string = map[health_data.WHOEuropeCodes]string{
+	health_data.WHOEuropeCodes_WHO_EUROPE_CODE_INFANT_MORTALITY_INDICATOR:         "HFA_73",
+	health_data.WHOEuropeCodes_WHO_EUROPE_CODE_EARLY_NEONATAL_MORTALITY_INDICATOR: "HFA_78",
+	health_data.WHOEuropeCodes_WHO_EUROPE_CODE_CIRCULATORY_DISEASES_INDICATOR:     "HFA_98",
+	health_data.WHOEuropeCodes_WHO_EUROPE_CODE_ISCHAEMIC_HEART_DISEASE_INDICATOR:  "HFA_107",
+	health_data.WHOEuropeCodes_WHO_EUROPE_CODE_CEREBROVASCULAR_DISEASES_INDICATOR: "HFA_119",
 }
 
 // HFA_73: Estimated infant mortality per 1000 live births (world health report)
@@ -102,7 +103,7 @@ var ischaemic_heart_disease_indicator string = "HFA_107"
 // HFA_119: Cerebrovascular diseases, all ages, per 100 000, by sex (age-standardized death rate)
 var cerebrovascular_diseases_indicator string = "HFA_119"
 
-func GetCountryCode(country pb.Country) (string, error) {
+func GetCountryCode(country health_data.Country) (string, error) {
 	code, exists := dictionary_countries[country]
 	if !exists {
 		return "", fmt.Errorf("country code not found for country: %v", country)
@@ -110,16 +111,16 @@ func GetCountryCode(country pb.Country) (string, error) {
 	return code, nil
 }
 
-func GetCountry(code string) (pb.Country, error) {
+func GetCountry(code string) (health_data.Country, error) {
 	for country, c := range dictionary_countries {
 		if c == code {
 			return country, nil
 		}
 	}
-	return pb.Country_COUNTRY_UNKNOWN, fmt.Errorf("country not found for code: %s", code)
+	return health_data.Country_COUNTRY_UNKNOWN, fmt.Errorf("country not found for code: %s", code)
 }
 
-func GetIndicatorCode(indicator pb.WHOEuropeCodes) (string, error) {
+func GetIndicatorCode(indicator health_data.WHOEuropeCodes) (string, error) {
 	code, exists := dictionary_codes[indicator]
 	if !exists {
 		return "", fmt.Errorf("indicator code not found for indicator: %v", indicator)
@@ -127,20 +128,20 @@ func GetIndicatorCode(indicator pb.WHOEuropeCodes) (string, error) {
 	return code, nil
 }
 
-func GetIndicator(code string) (pb.WHOEuropeCodes, error) {
+func GetIndicator(code string) (health_data.WHOEuropeCodes, error) {
 	for indicator, c := range dictionary_codes {
 		if c == code {
 			return indicator, nil
 		}
 	}
-	return pb.WHOEuropeCodes_WHO_EUROPE_CODE_UNKNOWN, fmt.Errorf("indicator not found for code: %s", code)
+	return health_data.WHOEuropeCodes_WHO_EUROPE_CODE_UNKNOWN, fmt.Errorf("indicator not found for code: %s", code)
 }
 
 // ParseWHOEuropeCSVToReply parses a WHO-Europe CSV-style string (like the sample you provided)
-// into a pb.WhoEuropeResponse. The function is tolerant: it first extracts simple metadata
+// into a health_data.WhoEuropeResponse. The function is tolerant: it first extracts simple metadata
 // key/value pairs until it finds the data header row ("COUNTRY","COUNTRY_GRP","SEX","YEAR","VALUE"),
 // then collects data rows into objects and attempts to unmarshal a JSON representation into
-// pb.WhoEuropeResponse using protojson with unknown fields discarded.
+// health_data.WhoEuropeResponse using protojson with unknown fields discarded.
 //
 // Note: this implementation assumes the proto message uses common JSON field names such as
 // "indicator", "lastUpdate", "description", "referenceLink" and a repeated "data" field whose
@@ -159,7 +160,7 @@ func ParseWHOEuropeCSVToReply(csvStr string) (*pb.WHOEuropeResponse, error) {
 	response := &pb.WHOEuropeResponse{
 		Csv: csvStr,
 	}
-	datas := []*pb.WHOData{}
+	datas := []*health_data.WHOData{}
 
 	response.DataSource = records[4][1]
 	response.Unit = records[6][1]
@@ -206,7 +207,7 @@ func ParseWHOEuropeCSVToReply(csvStr string) (*pb.WHOEuropeResponse, error) {
 			return nil, fmt.Errorf("invalid numeric value %q at row %d: %w", rec[4], i+breakIndex, err)
 		}
 
-		data := &pb.WHOData{
+		data := &health_data.WHOData{
 			Country:    rec[0],
 			CountryGrp: rec[1],
 			Sex:        rec[2],
