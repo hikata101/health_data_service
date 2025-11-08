@@ -1,0 +1,165 @@
+syntax = "proto3";
+package health_data_service.v1;
+option go_package = "github.com/hikata101/health_data_service/v1";
+
+service Dataset {
+  // Fan-out to multiple providers and stream back results in arrival order.
+  rpc Download (DownloadRequest) returns (stream DownloadReply);
+  rpc Upload(stream UploadChunk) returns (UploadReply);
+  rpc List(ListDatasetsRequest) returns (ListDatasetsReply);
+}
+
+enum ProvidersKind {
+  PROVIDER_KIND_UNKNOWN = 0;
+  PROVIDER_KIND_WHO_EUROPE = 1;
+}
+
+message DownloadRequest {
+  // which provider to use
+  ProvidersKind provider = 1;
+  oneof request {
+    WHOEuropeRequest who_europe = 2;
+  }
+}
+
+message WHOEuropeRequest {
+  WHOEuropeCodes indicator = 1;
+  Country country = 2;
+}
+
+enum WHOEuropeCodes {
+  WHO_EUROPE_CODE_UNKNOWN = 0;
+  WHO_EUROPE_CODE_INFANT_MORTALITY_INDICATOR = 1;
+  WHO_EUROPE_CODE_EARLY_NEONATAL_MORTALITY_INDICATOR = 2;
+  WHO_EUROPE_CODE_CIRCULATORY_DISEASES_INDICATOR = 3;
+  WHO_EUROPE_CODE_ISCHAEMIC_HEART_DISEASE_INDICATOR = 4;
+  WHO_EUROPE_CODE_CEREBROVASCULAR_DISEASES_INDICATOR = 5;
+}
+
+enum Country{
+  COUNTRY_UNKNOWN = 0;
+  COUNTRY_ALBANIA = 1;
+  COUNTRY_ANDORRA = 2;
+  COUNTRY_ARMENIA = 3;
+  COUNTRY_AUSTRIA = 4;
+  COUNTRY_AZERBAIJAN = 5;
+  COUNTRY_BELARUS = 6;
+  COUNTRY_BELGIUM = 7;
+  COUNTRY_BELGIUM_BRUXELLES = 8;
+  COUNTRY_BELGIUM_FLANDERS = 9;
+  COUNTRY_BELGIUM_WALLONIA = 10;
+  COUNTRY_BOSNIA_AND_HERZEGOVINA = 11;
+  COUNTRY_BULGARIA = 12;
+  COUNTRY_CANADA = 13;
+  COUNTRY_CROATIA = 14;
+  COUNTRY_CYPRUS = 15;
+  COUNTRY_CZECH_REPUBLIC = 16;
+  COUNTRY_DENMARK = 17;
+  COUNTRY_ESTONIA = 18;
+  COUNTRY_FINLAND = 19;
+  COUNTRY_FRANCE = 20;
+  COUNTRY_GEORGIA = 21;
+  COUNTRY_GERMANY = 22;
+  COUNTRY_GREECE = 23;
+  COUNTRY_GREENLAND = 24;
+  COUNTRY_HUNGARY = 25;
+  COUNTRY_ICELAND = 26;
+  COUNTRY_IRELAND = 27;
+  COUNTRY_ISRAEL = 28;
+  COUNTRY_ITALY = 29;
+  COUNTRY_KAZAKHSTAN = 30;
+  COUNTRY_KYRGYZSTAN = 31;
+  COUNTRY_LATVIA = 32;
+  COUNTRY_LITHUANIA = 33;
+  COUNTRY_LUXEMBOURG = 34;
+  COUNTRY_MALTA = 35;
+  COUNTRY_MONACO = 36;
+  COUNTRY_MONTENEGRO = 37;
+  COUNTRY_NETHERLANDS = 38;
+  COUNTRY_NORTH_MACEDONIA = 39;
+  COUNTRY_NORWAY = 40;
+  COUNTRY_POLAND = 41;
+  COUNTRY_PORTUGAL = 42;
+  COUNTRY_REPUBLIC_OF_MOLDOVA = 43;
+  COUNTRY_ROMANIA = 44;
+  COUNTRY_RUSSIAN_FEDERATION = 45;
+  COUNTRY_SAN_MARINO = 46;
+  COUNTRY_SERBIA = 47;
+  COUNTRY_SERBIA_VOJVODINA = 48;
+  COUNTRY_THE_FORMER_STATE_UNION_OF_SERBIA_AND_MONTENEGRO = 49;
+  COUNTRY_SLOVAKIA = 50;
+  COUNTRY_SLOVENIA = 51;
+  COUNTRY_SPAIN = 52;
+  COUNTRY_SWEDEN = 53;
+  COUNTRY_SWITZERLAND = 54;
+  COUNTRY_TAJIKISTAN = 55;
+  COUNTRY_TURKIYE = 56;
+  COUNTRY_TURKMENISTAN = 57;
+  COUNTRY_UKRAINE = 58;
+  COUNTRY_UNITED_KINGDOM = 59;
+  COUNTRY_UNITED_KINGDOM_ENGLAND = 60;
+  COUNTRY_UNITED_KINGDOM_NORTHERN_IRELAND = 61;
+  COUNTRY_UNITED_KINGDOM_SCOTLAND = 62;
+  COUNTRY_UNITED_KINGDOM_WALES = 63;
+  COUNTRY_UNITED_STATES_OF_AMERICA = 64;
+  COUNTRY_REPUBLIC_OF_UZBEKISTAN = 65;
+  COUNTRY_KOSOVO = 66;
+}
+
+message DownloadReply {
+  int32 status = 1;
+  oneof reply {
+    WHOEuropeReply who_europe_reply = 2;
+  }
+}
+
+message WHOEuropeReply {
+  string csv = 1;
+  string data_source = 2;
+  string unit = 3;
+  string representation = 4;
+  repeated string data_set = 5;
+  string masks = 6;
+  repeated WHOReplyData data = 7;
+  string last_update = 8;
+  string description = 9;
+  string reference_link = 10;
+  string copyright = 11;
+}
+
+message WHOReplyData {
+  string country = 1;
+  string country_grp = 2;
+  string sex = 3;
+  string year = 4;
+  string value = 5;
+}
+
+enum DatasetFormat {
+  DATASET_FORMAT_UNKNOWN = 0;
+  DATASET_FORMAT_CSV     = 1;
+  DATASET_FORMAT_NETCDF  = 2;
+  DATASET_FORMAT_JSON    = 3;
+}
+
+message DatasetMeta {
+  string id = 1;         // server-assigned (UUID)
+  string name = 2;       // client-provided filename/logical name
+  DatasetFormat format = 3;
+  int64 size_bytes = 4;
+  string path = 5;       // server-side storage path (opaque for client)
+  string created_at = 6; // RFC3339
+}
+
+// Client-streaming upload (chunked)
+message UploadChunk {
+  oneof body {
+    DatasetMeta meta = 1;   // MUST be sent first
+    bytes chunk = 2;        // raw bytes (arbitrary size chunks)
+  }
+}
+
+message UploadReply { DatasetMeta meta = 1; }
+
+message ListDatasetsRequest {}
+message ListDatasetsReply { repeated DatasetMeta items = 1; }
