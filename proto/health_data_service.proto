@@ -131,8 +131,8 @@ message WHOReplyData {
   string country = 1;
   string country_grp = 2;
   string sex = 3;
-  string year = 4;
-  string value = 5;
+  int32 year = 4;
+  float value = 5;
 }
 
 enum DatasetFormat {

@@ -2,12 +2,11 @@ package domain
 
 import (
 	"encoding/csv"
-	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 
 	pb "github.com/hikata101/health_data_service/gen/github.com/hikata101/health_data_service/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 )
 
 var dictionary_countries = map[pb.Country]string{
@@ -147,6 +146,7 @@ func GetIndicator(code string) (pb.WHOEuropeCodes, error) {
 // elements map keys "COUNTRY","COUNTRY_GRP","SEX","YEAR","VALUE" (lowercased in JSON).
 // If your generated proto uses different field names adjust the jsonMap construction accordingly.
 func ParseWHOEuropeCSVToReply(csvStr string) (*pb.WHOEuropeReply, error) {
+	csvStr = strings.ReplaceAll(csvStr, "\ufeff", "") // normalize line endings
 	r := csv.NewReader(strings.NewReader(csvStr))
 	r.FieldsPerRecord = -1
 	records, err := r.ReadAll()
@@ -154,84 +154,67 @@ func ParseWHOEuropeCSVToReply(csvStr string) (*pb.WHOEuropeReply, error) {
 		return nil, fmt.Errorf("csv read error: %w", err)
 	}
 
-	metadata := map[string]string{}
-	var dataRows []map[string]string
-	headerFound := false
-	var header []string
+	datasets := []string{}
+	reply := &pb.WHOEuropeReply{
+		Csv: csvStr,
+	}
+	datas := []*pb.WHOReplyData{}
 
+	reply.DataSource = records[4][1]
+	reply.Unit = records[6][1]
+	reply.Representation = records[8][1]
+	breakIndex := 0
+	for i, rec := range records {
+		if i < 10 {
+			continue
+		}
+		if rec[0] == "DATA_MASK" {
+			reply.Masks = records[i][1]
+			breakIndex = i + 6
+			break
+		}
+		datasets = append(datasets, rec[1])
+	}
+	reply.DataSet = datasets
 	// Walk rows: metadata until header row is found, then data rows according to header
-	for _, rec := range records {
+	for i, rec := range records[breakIndex:] {
 		// skip empty records
 		if len(rec) == 0 {
 			continue
 		}
-
+		if rec[0] == "Last update" {
+			reply.LastUpdate = rec[1]
+			reply.Description = records[i+breakIndex+1][1]
+			reply.ReferenceLink = records[i+breakIndex+2][1]
+			reply.Copyright = records[i+breakIndex+4][0]
+			break
+		}
 		// trim spaces on all fields
 		for i := range rec {
 			rec[i] = strings.TrimSpace(rec[i])
 		}
 
-		// detect header row
-		if len(rec) >= 5 && rec[0] == "COUNTRY" && rec[1] == "COUNTRY_GRP" && rec[2] == "SEX" {
-			headerFound = true
-			header = rec
-			continue
+		// parse year
+		yearVal, err := strconv.Atoi(rec[3])
+		if err != nil {
+			return nil, fmt.Errorf("invalid year value %q at row %d: %w", rec[3], i+breakIndex, err)
+		}
+		// parse value
+		val64, err := strconv.ParseFloat(rec[4], 32)
+		if err != nil {
+			return nil, fmt.Errorf("invalid numeric value %q at row %d: %w", rec[4], i+breakIndex, err)
 		}
 
-		if !headerFound {
-			// treat as metadata key,value pairs when there are at least two columns
-			if len(rec) >= 2 {
-				key := rec[0]
-				val := rec[1]
-				metadata[key] = val
-			}
-			continue
+		data := &pb.WHOReplyData{
+			Country:    rec[0],
+			CountryGrp: rec[1],
+			Sex:        rec[2],
+			Year:       int32(yearVal),
+			Value:      float32(val64),
 		}
-
-		// headerFound == true -> data rows
-		// Map fields by header names
-		rowMap := map[string]string{}
-		for i, h := range header {
-			if i < len(rec) {
-				rowMap[h] = rec[i]
-			} else {
-				rowMap[h] = ""
-			}
-		}
-		dataRows = append(dataRows, rowMap)
+		datas = append(datas, data)
 	}
 
-	// Build a JSON-friendly map matching expected proto JSON shape
-	jsonMap := map[string]interface{}{}
-
-	// common metadata keys from your sample
-	if v, ok := metadata["INDICATOR"]; ok {
-		jsonMap["indicator"] = v
-	}
-	if v, ok := metadata["Last update"]; ok {
-		jsonMap["lastUpdate"] = v
-	}
-	if v, ok := metadata["Description"]; ok {
-		jsonMap["description"] = v
-	}
-	if v, ok := metadata["Reference link"]; ok {
-		jsonMap["referenceLink"] = v
-	}
-	if v, ok := metadata["UNIT_TYPE"]; ok {
-		jsonMap["unitType"] = v
-	}
-	// include the parsed data rows under "data"
-	jsonMap["data"] = dataRows
-
-	b, err := json.Marshal(jsonMap)
-	if err != nil {
-		return nil, fmt.Errorf("json marshal error: %w", err)
-	}
-
-	reply := &pb.WHOEuropeReply{}
-	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
-	if err := opts.Unmarshal(b, reply); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal into pb.WHOEuropeReply: %w", err)
-	}
+	reply.Data = datas
 	return reply, nil
 }

@@ -46,15 +46,21 @@ func DownloadDataset(req *pb.DownloadRequest, stream grpc.ServerStreamingServer[
 			return err
 		}
 		logger.Logger.Debug(fmt.Sprintf("Received WHO Europe response: %s", resp))
-
+		parsed, err := ParseWHOEuropeCSVToReply(resp)
+		if err != nil {
+			logger.Logger.Error(fmt.Sprintf("Error parsing WHO Europe response: %v", err))
+			stream.Send(&pb.DownloadReply{
+				Status: int32(codes.Internal),
+			})
+			return err
+		}
+		print(parsed)
 		// Send the parsed protobuf message back to the client
 		logger.Logger.Debug("Successfully parsed WHO Europe response into protobuf")
 		stream.Send(&pb.DownloadReply{
 			Status: int32(codes.OK),
 			Reply: &pb.DownloadReply_WhoEuropeReply{
-				WhoEuropeReply: &pb.WHOEuropeReply{
-					Csv: resp,
-				},
+				WhoEuropeReply: parsed,
 			}})
 	default:
 		logger.Logger.Error("Unknown download request type")
